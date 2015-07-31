@@ -1,0 +1,17 @@
+{
+    "title" : "Tennis Community Opposes New Construction Plans",
+    "author" : {
+	"firstname" : "Erin",
+	"lastname" : "Perrine",
+	"profile_page" : "www.google.com",
+    },
+    "meta": {
+	"date" : "2015-05-04",
+	"tags" : ["tennis", "construction"]
+    },
+    "content": {
+	"body_markdown" : "body text here",
+	"image_urls" : null,
+	"media_url" : null
+    }
+}
