@@ -9,7 +9,8 @@ mongoose.connect('mongodb://localhost/mabearnews');
 var db = mongoose.connection;
 
 var articleSchema = mongoose.Schema({
-    title: String,
+    full_title: {type: String, trim: true},
+    url_title: {type: String, trim: true, lowercase: true},
     author: {
 	firstname: String,
 	lastname: String,
@@ -42,49 +43,78 @@ app.get('/', function (req, res) {
 
 app.get('/api', function (req, res) {
     res.send("API doc will be here");
-    
-    Article.find(function (err, articles) {
-	if (err) return console.error(err);
-	console.log("reading...");
-	console.log(articles);
-    });
 });
 
 app.post('/api/articles/save', function (req, res) {
-    console.log(req.body);
     var article = new Article(req.body);
 
     // Convert date to unix
     article.meta.date = moment(article.meta.date);
 
-    article.save(function (err) {
-	console.error(err);
+    // Check for duplicate url
+    Article.count({url_title: article.url_title }, function(err, count){
+	if(count == 0){
+	    // No dup, save new doc
+	    article.save(function (err) {
+		console.error(err);
+		console.log(err.message);
+	    });
+	    
+	    res.send("Saved");
+	} else {
+	    // Dup, respond with error
+	    // TODO: fix magic error string
+	    res.send("Error: Duplicate url_title, doccument rejected");
+	}
     });
-    
-    res.send("Sent");
 });
 
-app.get('/api/articles/all', function (req, res) {
-    Article.find(function (err, articles) {
-	if (err) return console.error(err);
-	res.send(articles);
-    });
-});
-
-app.get('/api/articles', function (req, res) {
-    var weeksAgo = req.param('weeks');
-
-    var now = moment().toDate();
-    var lastTime = moment().subtract(weeksAgo, 'weeks').toDate();
+app.get('/api/articles/delete/:urltitle', function (req, res) {
+    var title = req.params.urltitle;
 
     var callback = function (err, articles) {
 	if (err) return handleError(err);
-	res.send(articles);
-    };
-    
-    var query = Article.find().
-	where('meta.date').gt(lastTime).lt(now).
-	exec(callback);
+	if(articles.length === 0){
+	    res.send("Error: No Articles found");
+	} else {
+	    for(var i = 0; i < articles.length; i++){
+		articles[i].remove();
+	    }
+	    res.send("Removed");
+	}
+	};
+	
+	var query = Article.find().
+	    where('url_title').equals(title).
+	    exec(callback);
+});
+
+
+// Avalible params: weeks, number of articles
+app.get('/api/articles', function (req, res) {
+    // ex: /api/articles?weeks=2
+    var weeksAgo = req.query.weeks;
+
+    if(JSON.stringify(req.query) === "{}") {
+	// No week param, send it all
+	Article.find(function (err, articles) {
+	    if (err) return console.error(err);
+	    res.send(articles);
+	});
+    } else {
+	// Week param given
+	var now = moment().toDate();
+	var lastTime = moment().subtract(weeksAgo, 'weeks').toDate();
+	
+	var callback = function (err, articles) {
+	    if (err) return handleError(err);
+	    res.send(articles);
+	};
+	
+	var query = Article.find().
+	    where('meta.date').gt(lastTime).lt(now).
+	    exec(callback);
+    }
 });
 
 
