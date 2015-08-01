@@ -57,7 +57,6 @@ app.post('/api/articles/save', function (req, res) {
 	    // No dup, save new doc
 	    article.save(function (err) {
 		console.error(err);
-		console.log(err.message);
 	    });
 	    
 	    res.send("Saved");
