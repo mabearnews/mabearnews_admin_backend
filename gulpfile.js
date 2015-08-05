@@ -17,7 +17,7 @@ gulp.task('lint-watch', function(){
 
 gulp.task('start', function () {
   nodemon({
-      script: 'index.js',
+      script: 'app.js',
       ext: 'js',
       env: { 'NODE_ENV': 'development' }
   });
