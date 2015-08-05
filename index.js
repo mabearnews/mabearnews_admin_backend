@@ -1,34 +1,13 @@
-var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var moment = require('moment');
+var express = require('express'),
+    app = express(),
+    bodyParser = require('body-parser'),
+    mongoose = require('mongoose'),
+    Article = require('./models/article'),
+    moment = require('moment');
 
 mongoose.connect('mongodb://localhost/mabearnews');
 
 var db = mongoose.connection;
-
-var articleSchema = mongoose.Schema({
-    full_title: {type: String, trim: true},
-    url_title: {type: String, trim: true, lowercase: true},
-    author: {
-	firstname: String,
-	lastname: String,
-	profile_page: String,
-    },
-    meta: {
-	date: { type: Date, default: Date.now },
-	published: Boolean,
-	tags: [String]
-    },
-    content: {
-	body_markdown: String,
-	image_urls: [String],
-	media_url: String
-    }
-});
-
-var Article = mongoose.model('Article', articleSchema);
 
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
@@ -92,55 +71,59 @@ app.get('/api/articles/delete/:urltitle', function (req, res) {
 
 // Avalible params:
 // weeks: integer value for how many weeks of articles to return
-// max_articles: interger value for the max number of articles to return
+// max_articles: interger value for the max number of articles to return, defaults to unlimited
 // published_only: boolean value, true excludes unpublished articles, defaults to true
 app.get('/api/articles', function (req, res) {
     // ex: /api/articles?weeks=2
-    var weeksAgo = req.query.weeks;
-    var max_articles = req.query.max_articles;
+    var weeks = req.query.weeks;
+    var max_articles = parseInt(req.query.max_articles);
     var published_only = req.query.published_only;
 
-    console.log(weeksAgo);
-    console.log(max_articles);
-    console.log(published_only);
-
+    var query_params = {};
     
-    var query = {};
-    if(weeks !== null) {
+    if(typeof weeks !== 'undefined') {
+	weeks = parseInt(weeks);
+
 	var now = moment().toDate();
-	var lastTime = moment().subtract(weeksAgo, 'weeks').toDate();
-	query.'meta.date' = { $gt: lastTime, $lt: now };
+	var lastTime = moment().subtract(weeks, 'weeks').toDate();
+	Object.defineProperty(query_params, 'meta.date', {
+	    value: { "$gt": lastTime, "$lt": now },
+	    writable: true,
+	    configurable: true,
+	    enumerable: true
+	});
     }
 
-    if(published_only !== null) {
-	
+    if(typeof max_articles !== 'undefined') {
+	max_articles = parseInt(max_articles);
+    } else {
+	// Unlimited is zero, default behavior
+	max_articles = 0;
     }
-
-    console.log(query);
     
+    if(typeof published_only !== 'undefined') {
+	published_only = (published_only.toLowerCase() === 'true');
+	Object.defineProperty(query_params, 'meta.published', {
+	    value: published_only,
+	    writable: true,
+	    configurable: true,
+	    enumerable: true
+	});
+    }
     
+    console.log(typeof weeks);
+    console.log(typeof max_articles);
+    console.log(typeof published_only);
 
-    if(JSON.stringify(req.query) === "{}") {
-	// No params, send it all
-	Article.find(function (err, articles) {
+    console.log(query_params);
+    
+    Article.find(query_params).
+	sort({'meta.date': -1}).
+	limit(max_articles).
+	exec(function(err, articles) {
 	    if (err) return console.error(err);
 	    res.send(articles);
 	});
-    } else {
-	// Week param given
-	var now = moment().toDate();
-	var lastTime = moment().subtract(weeksAgo, 'weeks').toDate();
-	
-	var callback = function (err, articles) {
-	    if (err) return handleError(err);
-	    res.send(articles);
-	};
-	
-	var query = Article.find().
-	    where('meta.date').gt(lastTime).lt(now).
-	    where('meta.published').
-	    exec(callback);
-    }
 });
 
 

@@ -3,7 +3,7 @@ var gulp = require('gulp'),
     jshint = require('gulp-jshint'),
     nodemon = require('gulp-nodemon');
 
-var scriptFiles = './app/*.js';
+var scriptFiles = '*.js';
 
 gulp.task('lint', function(){
     gulp.src(scriptFiles)
@@ -12,30 +12,17 @@ gulp.task('lint', function(){
 });
 
 gulp.task('lint-watch', function(){
-    gulp.run('lint');
-    gulp.watch(scriptFiles, function(){
-	gulp.run('lint');
-    });
+    gulp.watch(scriptFiles, ['lint']);
 });
 
 gulp.task('start', function () {
   nodemon({
-    script: 'app/index.js'
-  , ext: 'js'
-  , env: { 'NODE_ENV': 'development' }
+      script: 'index.js',
+      ext: 'js',
+      env: { 'NODE_ENV': 'development' }
   });
-})
-
-gulp.task('develop', function() {
-    nodemon({
-	script: 'app/index.js',
-	ext: 'js',
-	task: ['lint']
-    }).on('restart', function() {
-	console.log("Restarted");
-    });
 });
 
-gulp.task('default', function() {
-    gulp.run('develop');
-});
+gulp.task('develop', ['lint', 'start', 'lint-watch']);
+
+gulp.task('default', ['develop']);
