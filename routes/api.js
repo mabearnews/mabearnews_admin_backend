@@ -1,4 +1,5 @@
-Article = require('../models/article');
+var Article = require('../models/article'),
+    moment = require('moment');
 
 module.exports = function (app) {
     
