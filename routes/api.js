@@ -30,7 +30,7 @@ module.exports = function (app) {
 	});
     });
     
-    app.get('/api/articles/delete/:urltitle', function (req, res) {
+    app.delete('/api/articles/delete/:urltitle', function (req, res) {
 	var title = req.params.urltitle;
 	
 	var callback = function (err, articles) {
