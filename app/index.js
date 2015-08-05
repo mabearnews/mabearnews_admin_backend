@@ -18,6 +18,7 @@ var articleSchema = mongoose.Schema({
     },
     meta: {
 	date: { type: Date, default: Date.now },
+	published: Boolean,
 	tags: [String]
     },
     content: {
@@ -53,7 +54,7 @@ app.post('/api/articles/save', function (req, res) {
 
     // Check for duplicate url
     Article.count({url_title: article.url_title }, function(err, count){
-	if(count == 0){
+	if(count === 0){
 	    // No dup, save new doc
 	    article.save(function (err) {
 		console.error(err);
@@ -89,13 +90,38 @@ app.get('/api/articles/delete/:urltitle', function (req, res) {
 });
 
 
-// Avalible params: weeks, number of articles
+// Avalible params:
+// weeks: integer value for how many weeks of articles to return
+// max_articles: interger value for the max number of articles to return
+// published_only: boolean value, true excludes unpublished articles, defaults to true
 app.get('/api/articles', function (req, res) {
     // ex: /api/articles?weeks=2
     var weeksAgo = req.query.weeks;
+    var max_articles = req.query.max_articles;
+    var published_only = req.query.published_only;
+
+    console.log(weeksAgo);
+    console.log(max_articles);
+    console.log(published_only);
+
+    
+    var query = {};
+    if(weeks !== null) {
+	var now = moment().toDate();
+	var lastTime = moment().subtract(weeksAgo, 'weeks').toDate();
+	query.'meta.date' = { $gt: lastTime, $lt: now };
+    }
+
+    if(published_only !== null) {
+	
+    }
+
+    console.log(query);
+    
+    
 
     if(JSON.stringify(req.query) === "{}") {
-	// No week param, send it all
+	// No params, send it all
 	Article.find(function (err, articles) {
 	    if (err) return console.error(err);
 	    res.send(articles);
@@ -112,6 +138,7 @@ app.get('/api/articles', function (req, res) {
 	
 	var query = Article.find().
 	    where('meta.date').gt(lastTime).lt(now).
+	    where('meta.published').
 	    exec(callback);
     }
 });
