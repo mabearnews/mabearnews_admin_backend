@@ -93,12 +93,6 @@ module.exports = function (app) {
 	    });
 	}
 	
-	console.log(typeof weeks);
-	console.log(typeof max_articles);
-	console.log(typeof published_only);
-	
-	console.log(query_params);
-	
 	Article.find(query_params).
 	    sort({'meta.date': -1}).
 	    limit(max_articles).

@@ -11,6 +11,8 @@ var articleSchema = mongoose.Schema({
     meta: {
 	date: { type: Date, default: Date.now },
 	published: Boolean,
+	headliner: Boolean,
+	section: String,
 	tags: [String]
     },
     content: {

@@ -9,6 +9,8 @@
     "meta": {
 	"date" : "2015-05-04",
 	"published" : true,
+	"headliner" : true,
+	"section" : "sports",
 	"tags" : ["tennis", "construction"]
     },
     "content": {
