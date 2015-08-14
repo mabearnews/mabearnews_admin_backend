@@ -50,11 +50,13 @@ module.exports = function (app) {
 	    exec(callback);
     });
     
-    
-    // Avalible params:
-    // weeks: integer value for how many weeks of articles to return
-    // max_articles: interger value for the max number of articles to return, defaults to unlimited
-    // published_only: boolean value, true excludes unpublished articles, defaults to true
+    /*Avalible params:
+     * weeks: integer value for how many weeks of articles to return
+     * max_articles: interger value for the max number of articles
+     *               to return, defaults to unlimited
+     * published_only: boolean value, true excludes unpublished
+     *                 articles, defaults to true
+     */
     app.get('/api/articles', function (req, res) {
 	// ex: /api/articles?weeks=2
 	var weeks = req.query.weeks;
