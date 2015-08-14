@@ -1,0 +1,9 @@
+var ids = {
+    google: {
+	consumerKey: 'PUT KEY HERE',
+	consumerSecret: 'PUT SECRET HERE',
+	callbackURL: 'http://127.0.0.1:3000/auth/google/callback'
+    }
+};
+
+module.exports = ids;
