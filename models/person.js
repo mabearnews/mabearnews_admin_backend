@@ -4,27 +4,28 @@ var mongoose = require('mongoose'),
 
 
 var personSchema = mongoose.Schema({
-    // From oauth
-    id: {
+    info: {
 	identifier: Number,
 	firstname: {type: String, trim: true},
 	lastname: {type: String, trim: true},
-	email: {type: String, trim: true},
-    }
+	email: {type: String, trim: true}
+    },
     // 0: writer, 1: editor, 2: admin
     access_level: {type: Number, min: 0, max: 2}
 });
 
-authorSchema.virtual('fullname').get(function () {
+
+personSchema.virtual('fullname').get(function () {
     return firstname + " " + lastname;
 });
 
-authorSchema.virtual('articles').get(function () {
-    
+// TODO: find articles
+personSchema.virtual('articles').get(function () {
+    return ""
 });
 
 personSchema.plugin(findOrCreate);
 
 var Person = mongoose.model('Person', personSchema);
 
-model.exports = Person;
+module.exports = Person;

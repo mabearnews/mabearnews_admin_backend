@@ -1,6 +1,7 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
 
-var articleSchema = mongoose.Schema({
+var articleSchema = Schema({
     meta: {
 	full_title: {type: String, trim: true},
 	url_title: {type: String, trim: true, lowercase: true},
@@ -14,7 +15,7 @@ var articleSchema = mongoose.Schema({
 	type: {type: String, trim: true, lowercase: true},
 	// Links to simiarly tagged topics
 	tags: [String]
-    }
+    },
     content: {
 	body_markdown: String,
 	image_urls: [String],
